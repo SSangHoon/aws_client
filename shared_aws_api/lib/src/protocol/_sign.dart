@@ -18,7 +18,9 @@ void signAws4HmacSha256({
   rq.headers['Host'] = rq.url.host;
   rq.headers['x-amz-content-sha256'] ??=
       sha256.convert(rq.bodyBytes).toString();
-
+  if (credentials.sessionToken != null) {
+    rq.headers['X-Amz-Security-Token'] = credentials.sessionToken!;
+  }
   // sorted list of key:value header entries
   final canonicalHeaders = rq.headers.keys
       .map((key) => '${key.toLowerCase()}:${rq.headers[key]!.trim()}')
@@ -61,9 +63,6 @@ void signAws4HmacSha256({
   });
   final signature =
       Hmac(sha256, signingKey).convert(utf8.encode(toSign)).toString();
-  if (credentials.sessionToken != null) {
-    rq.headers['X-Amz-Security-Token'] = credentials.sessionToken!;
-  }
 
   final auth = '$_aws4HmacSha256 '
       'Credential=${credentials.accessKey}/${credentialList.join('/')}, '
